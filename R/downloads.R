@@ -64,6 +64,12 @@ NULL
 get_GIs<-function(org.name, db, n.start = 1, n.stop = NULL, step = 99999,
                   return.vector = TRUE, check.result = FALSE, term = NULL,
                   temp.dir=NULL, delete.temp = FALSE, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("reutils", quietly = TRUE)) { stop("Package \"reutils\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("XML", quietly = TRUE)) { stop("Package \"XML\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("curl", quietly = TRUE)) { stop("Package \"curl\" needed for this function to work. Please install it.", call. = FALSE)}
+  # options
   old.ops<-options()# turn off scientific notation
   on.exit(options(old.ops), add=T)
   options(scipen = 999)
@@ -120,6 +126,12 @@ get_GIs<-function(org.name, db, n.start = 1, n.stop = NULL, step = 99999,
 
 get_GIs_fix<-function(gis.list, org.name, db, n.start = 1, n.stop = NULL, step = 99999,
                       term = NULL, temp.dir = NULL, delete.temp = FALSE, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("reutils", quietly = TRUE)) { stop("Package \"reutils\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("XML", quietly = TRUE)) { stop("Package \"XML\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("curl", quietly = TRUE)) { stop("Package \"curl\" needed for this function to work. Please install it.", call. = FALSE)}
+  # options
   old.ops<-options()# turn off scientific notation
   on.exit(options(old.ops), add=T)
   options(scipen = 999)
@@ -221,6 +233,9 @@ NULL
 
 get_seq_info <- function (org.name, db, n.start = 1, n.stop = NULL, step = 500,
                        return.dataframe = FALSE, check.result = FALSE, term = NULL, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
+  # options
   old.ops<-options()# turn off scientific notation
   on.exit(options(old.ops), add=T)
   options(scipen = 999)
@@ -261,6 +276,9 @@ get_seq_info <- function (org.name, db, n.start = 1, n.stop = NULL, step = 500,
 #'
 get_seq_info_fix<-function(info.list, web.history = NULL, org.name = NULL, db,
                            n.start = 1, n.stop = NULL, step = 500, term = NULL, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
+  # options
   if (verbose) message ("Checking mistakes in ", length(info.list), " blocks") # start message
   old.ops<-options()# turn off scientific notation
   on.exit(options(old.ops), add=T)
@@ -294,23 +312,29 @@ info_listtodata<-function(info.list, unlist = TRUE){
   if (unlist==TRUE){ #unlisting
     info.list2<-list(); for (i in 1:length(info.list)){info.list2<-append(info.list2, info.list[[i]])}
     info.list<-info.list2}
-  uid<-as.numeric(unlist(lapply(info.list, '[', "uid")))
-  gi<-as.numeric(unlist(lapply(info.list, '[', "gi")))
-  GB_AcNum<-unlist(lapply(info.list, '[', "caption"))
-  createdate<-unlist(lapply(info.list, '[', "createdate"))
-  updatedate<-unlist(lapply(info.list, '[', "updatedate"))
-  source_db<-unlist(lapply(info.list, '[', "sourcedb"))
-  organism<-unlist(lapply(info.list, '[', "organism"))
-  title<-unlist(lapply(info.list, '[', "title"))
-  strain<-unlist(lapply(info.list, '[', "strain"))
-  taxid<-unlist(lapply(info.list, '[', "taxid"))
-  length<-unlist(lapply(info.list, '[', "slen"))
-  biomol<-unlist(lapply(info.list, '[', "biomol"))
-  moltype<-unlist(lapply(info.list, '[', "moltype"))
-  genome<-unlist(lapply(info.list, '[', "genome"))
-  complete<-unlist(lapply(info.list, '[', "completeness"))
-  geneticcode<-unlist(lapply(info.list, '[', "geneticcode"))
-  strand<-unlist(lapply(info.list, '[', "strand"))
+  # function to checl if field exists and make vector
+  make.vec <- function (info.list, field){
+    res <- c()
+    if (field %in% names (info.list[[1]])) {res<-unlist(lapply(info.list, '[', field))
+    } else {res<-rep (NA, length(info.list))}
+    return (res)}
+  uid<-make.vec(info.list, "uid")
+  gi<-as.numeric(make.vec(info.list, "gi"))
+  GB_AcNum<-make.vec(info.list, "caption")
+  createdate<-make.vec(info.list, "createdate")
+  updatedate<-make.vec(info.list, "updatedate")
+  source_db<-make.vec(info.list,  "sourcedb")
+  organism<-make.vec(info.list, "organism")
+  title<-make.vec(info.list,  "title")
+  strain<-make.vec(info.list, "strain")
+  taxid<-make.vec(info.list,  "taxid")
+  length<-make.vec(info.list, "slen")
+  biomol<-make.vec(info.list,  "biomol")
+  moltype<-make.vec(info.list, "moltype")
+  genome<-make.vec(info.list,  "genome")
+  complete <- make.vec(info.list, "completeness")
+  geneticcode<-make.vec(info.list, "geneticcode")
+  strand <- make.vec(info.list, "strand")
   #subinfo If several takes first
   subtype<-c(); subname<-c(); host<-c(); country<-c(); isolation_source<-c(); collection_date<-c()
   for (i in 1:length(info.list)){
@@ -374,6 +398,8 @@ NULL
 get_seq_for_DB <- function (ids, db, check.result = FALSE, return="data.frame", fasta.file = NULL,
                          exclude.from.download = FALSE, exclude.var, exclude.pattern, exclude.fixed = TRUE,
                          verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
   # check fasta file
   if (return=="fasta" & is.null(fasta.file)==TRUE){stop ("Set FASTA file name and path")} # fasta file name
   if (return=="fasta"){ if (file.exists(fasta.file)==TRUE){ warning ("Note that FASTA file already exists. Adding sequences to file.")}}
@@ -409,6 +435,8 @@ get_seq_for_DB <- function (ids, db, check.result = FALSE, return="data.frame", 
 
 get_seq_for_DB_fix <- function(res.data, db, verbose = TRUE){
   if (verbose) message ("checking mistakes")
+  # test package dependencies
+  if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
   for (i in 1:nrow(res.data)){
     if (is.na(res.data$seqs[i])==FALSE){ # NA try function from get_seqs_for_id returns in mistake; "\n" - is no seq (master record)
       if (res.data$seqs[i]=="no sequence" | res.data$seqs[i]=="\n"){
@@ -562,8 +590,10 @@ annotate_probes<-function(source = "data.frame", ann.data=NULL, gff.path=NULL,
                           file.annot = NULL, save.format = "txt", sep = ";", return = "add.resume",
                           priority = c ("CDS", "gene", "region"), data, data.probe.id.var,
                           delete.downloads = FALSE, verbose = TRUE){
+  # test package dependencies
+  if (source != "data.frame") {if (!requireNamespace("biomartr", quietly = TRUE)) { stop("Package \"biomartr\" needed for this function to work. Please install it.", call. = FALSE)}}
+  if (!requireNamespace("utils", quietly = TRUE)) { stop("Package \"utils\" needed for this function to work. Please install it.", call. = FALSE)}
   #check return and file format
-
   if (return!="annotation" & return!="resume" & return!="add.resume"){stop("Choose return parameter")}
   if (save.format!="txt" & save.format!="csv"){stop("Choose save.format parameter")}
   if (source!="data.frame" & source!="giff" & source!="load") {stop ("Choose annotation source")}
@@ -663,6 +693,10 @@ annotate_probes<-function(source = "data.frame", ann.data=NULL, gff.path=NULL,
 #' @name get_GA_files
 #' @export
 get_GA_files <- function (dir.path,  return = "both", seq.return = "data.frame", fasta.file = NULL, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("utils", quietly = TRUE)) { stop("Package \"utils\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("seqinr", quietly = TRUE)) { stop("Package \"seqinr\" needed for this function to work. Please install it.", call. = FALSE)}
+  #run
   res.list<-list("info"=NA, "sequenes"=NA) #future return
   #check return seqs and return
   if (seq.return!="vector" & seq.return!="data.frame" & seq.return!="fasta"){stop("Choose seq.return object")}

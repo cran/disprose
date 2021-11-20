@@ -44,6 +44,8 @@
 #'dir.create (path)
 #'# download and save as FASTA "Chlamydia pneumoniae B21 contig00001,
 #'# whole genome shotgun sequence" (GI = 737435910)
+#'if (!requireNamespace("rentrez", quietly = TRUE)) {
+#'stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
 #'reference.string <- rentrez::entrez_fetch(db = "nucleotide", id = 737435910,
 #'                                          rettype="fasta")
 #'write( x= reference.string, file = paste0 (path, "/fasta"))
@@ -60,6 +62,11 @@
 cut_probes <- function (ref.seq.from.file = FALSE, ref.seq.id, ref.seq.db, fasta.file = NULL, delete.fasta = FALSE,
                      start = 1, stop = NULL, start.correction = FALSE, size=24:32,
                      delete.incomplete = FALSE, delete.identical = FALSE, give.probes.id = FALSE, mc.cores = 1, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("seqinr", quietly = TRUE)) { stop("Package \"seqinr\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (ref.seq.from.file == TRUE){if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}}
+  if (!requireNamespace("dplyr", quietly = TRUE)) { stop("Package \"dplyr\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (delete.incomplete==TRUE) {if (!requireNamespace("stringr", quietly = TRUE)) { stop("Package \"stringr\" needed for this function to work. Please install it.", call. = FALSE)}}
   #download reference sequence
   if (is.null(fasta.file)==TRUE){stop ("Set fasta.file name and path")} # fasta file name
   if (ref.seq.from.file==FALSE){ # read from NCBI if there is no fasta
@@ -211,6 +218,12 @@ NULL
 count_PhCh <- function (probe.var, trim = FALSE, data, digits = 4, mc.cores = 1, MFE.files.dir = NULL, delete.MFE.files = FALSE,
                      GCmin = 40, GCmax = 60, nucl.pattern = c ("a", "t", "g", "c"), n.crit = 5, RNAfold.path, temperature = 40, MFEmin = -3,
                      TD.params = NULL, TMmin = 55, TMmax = 60, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("stringr", quietly = TRUE)) { stop("Package \"stringr\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("utils", quietly = TRUE)) { stop("Package \"stringr\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("TmCalculator", quietly = TRUE)) { stop("Package \"TmCalculator\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   if (verbose) message  ("Counting CG rate")
   GC.percent<-count_GC(probe.var = probe.var, trim.gc = FALSE, mc.cores=mc.cores, add.to.data = FALSE, digits=digits)
   if(trim==TRUE){nums<-which(GC.percent>=GCmin & GC.percent<=GCmax)
@@ -242,6 +255,10 @@ count_PhCh <- function (probe.var, trim = FALSE, data, digits = 4, mc.cores = 1,
 #'@describeIn count_PhCh Calculates GC-content (percent)
 #'@export
 count_GC <- function (probe.var, trim.gc = FALSE, GCmin = 40, GCmax = 60, mc.cores = 1, add.to.data = FALSE, data, digits = 4){
+  # test package dependencies
+  if (!requireNamespace("stringr", quietly = TRUE)) { stop("Package \"stringr\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   get_GC<-function(zond){GC.percent<-sum(stringr::str_count(zond, c("g", "c")))/nchar(zond)} # GCcount fun for 1 zond
   list<-parallel::mclapply(X=probe.var, FUN=function(x) get_GC(zond=x), mc.cores = mc.cores)
   GC.percent<-unlist(list);GC.percent<-GC.percent*100; GC.percent<-round(GC.percent, digits = digits);
@@ -257,6 +274,9 @@ count_GC <- function (probe.var, trim.gc = FALSE, GCmin = 40, GCmax = 60, mc.cor
 #'@export
 count_REP <- function (probe.var, trim.rep = FALSE,  nucl.pattern = c ("a", "t", "g", "c"),
                        n.crit = 5, mc.cores = 1, add.to.data = FALSE, data){
+  # test package dependencies
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   pattern.crit <- c(); for (i in 1:length(nucl.pattern)) {
     pattern.crit [i]<- paste (rep (nucl.pattern[i], n.crit), collapse = "")}
   get_rep<-function(zond){
@@ -278,6 +298,9 @@ count_REP <- function (probe.var, trim.rep = FALSE,  nucl.pattern = c ("a", "t",
 #'@export
 count_MFE <- function (probe.var, RNAfold.path, temperature = 40, trim.mfe = FALSE, MFEmin = -3, add.to.data = FALSE, data,
                        MFE.files.dir=NULL, delete.MFE.files = FALSE, mc.cores = 1, digits = 4, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("utils", quietly = TRUE)) { stop("Package \"utils\" needed for this function to work. Please install it.", call. = FALSE)}
   # test files directory
   if (is.null (MFE.files.dir) == TRUE) {stop ("Set MFE.files.dir parameter")}
   #change work directory
@@ -336,6 +359,9 @@ count_MFE <- function (probe.var, RNAfold.path, temperature = 40, trim.mfe = FAL
 #'@export
 count_TM <- function (probe.var, TD.params = NULL, trim.tm = FALSE, TMmin = 55, TMmax = 60,
                       add.to.data = FALSE, data, digits = 4, mc.cores = 1, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("TmCalculator", quietly = TRUE)) { stop("Package \"TmCalculator\" needed for this function to work. Please install it.", call. = FALSE)}
   # TD parameters
   if (is.null(TD.params)==TRUE){if (verbose) message ("Setting thermodynamic parameters. Default is: nn_table = DNA_NN4, tmm_table = DNA_TMM1,imm_table = DNA_IMM1, de_table = DNA_DE1")
     TD.params=c("DNA_NN4", "DNA_TMM1", "DNA_IMM1", "DNA_DE1")

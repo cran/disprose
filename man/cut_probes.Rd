@@ -79,6 +79,8 @@ path <- tempdir()
 dir.create (path)
 # download and save as FASTA "Chlamydia pneumoniae B21 contig00001,
 # whole genome shotgun sequence" (GI = 737435910)
+if (!requireNamespace("rentrez", quietly = TRUE)) {
+stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
 reference.string <- rentrez::entrez_fetch(db = "nucleotide", id = 737435910,
                                          rettype="fasta")
 write( x= reference.string, file = paste0 (path, "/fasta"))

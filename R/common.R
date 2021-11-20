@@ -68,6 +68,10 @@ NULL
 #' @describeIn store_in_DB Lists all tables from SQLite database
 #' @export
 list_DB <- function (database) {
+  # test package dependencies
+  if (!requireNamespace("DBI", quietly = TRUE)) { stop("Package \"DBI\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("RSQLite", quietly = TRUE)) { stop("Package \"RSQLite\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   conn <- DBI::dbConnect (RSQLite::SQLite (), database)
   on.exit(DBI::dbDisconnect (conn), add=T)
   res <- DBI::dbListTables (conn)
@@ -77,6 +81,10 @@ list_DB <- function (database) {
 #' @describeIn store_in_DB Writes data frame into SQLite database table
 #' @export
 write_to_DB <- function (database, data, table, overwrite=FALSE, append=FALSE, verbose = TRUE) {
+  # test package dependencies
+  if (!requireNamespace("DBI", quietly = TRUE)) { stop("Package \"DBI\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("RSQLite", quietly = TRUE)) { stop("Package \"RSQLite\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   conn <- DBI::dbConnect (RSQLite::SQLite (), database)
   on.exit(DBI::dbDisconnect (conn), add=T)
   names <- DBI::dbListTables (conn) # test if table is already in database
@@ -93,7 +101,10 @@ write_to_DB <- function (database, data, table, overwrite=FALSE, append=FALSE, v
 #' @describeIn store_in_DB Creates SQLite indexes in database table
 #' @export
 index_DB<-function(database, table, index.unique, index.column.name, verbose = TRUE){
-  #check
+  # test package dependencies
+  if (!requireNamespace("DBI", quietly = TRUE)) { stop("Package \"DBI\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("RSQLite", quietly = TRUE)) { stop("Package \"RSQLite\" needed for this function to work. Please install it.", call. = FALSE)}
+  #check index conditions
   if(length(index.unique)!=length(index.column.name)){stop("index.unique and index.column.name must be same length")}
   #connect
   conn <- DBI::dbConnect (RSQLite::SQLite (), database)
@@ -112,6 +123,10 @@ index_DB<-function(database, table, index.unique, index.column.name, verbose = T
 #' @export
 read_from_DB <- function (database, table, choose.columns=FALSE, column.names,
                           select=FALSE, select.column.name, select.val, unique = FALSE) {
+  # test package dependencies
+  if (!requireNamespace("DBI", quietly = TRUE)) { stop("Package \"DBI\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("RSQLite", quietly = TRUE)) { stop("Package \"RSQLite\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   conn <- DBI::dbConnect (RSQLite::SQLite (), database)
   on.exit(DBI::dbDisconnect (conn), add=T)
   # test if table is in database
@@ -137,6 +152,10 @@ read_from_DB <- function (database, table, choose.columns=FALSE, column.names,
 #' @describeIn  store_in_DB Deletes table from SQLite database.
 #' @export
 delete_from_DB <- function (database, table, verbose = TRUE) {
+  # test package dependencies
+  if (!requireNamespace("DBI", quietly = TRUE)) { stop("Package \"DBI\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("RSQLite", quietly = TRUE)) { stop("Package \"RSQLite\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   conn <- DBI::dbConnect (RSQLite::SQLite (), database)
   on.exit(DBI::dbDisconnect (conn), add=T)
   names <- DBI::dbListTables (conn) # test if table is in database
@@ -196,6 +215,8 @@ delete_from_DB <- function (database, table, verbose = TRUE) {
 #' @export
 delete_duplicates_DF <- function (data, duplicated.var, exact = FALSE, stay = "first",
                                   choose.var, choose.stay.val, pattern, mc.cores = 1, verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
   #check stay
   if(stay!="first" & stay!="choose" & stay!="none") {stop("Choose stay method")}
   # stay and choose
@@ -427,6 +448,9 @@ unite_two_DF <- function (data1, data1.shared.var, data1.shared.column.num = 1,
 #' @name normalize_DF
 #' @export
 normalize_DF <- function (data, var.name,  method = "mean", norm.number, return = "add.end", digits=2){
+  # test package dependencies
+  if (!requireNamespace("stats", quietly = TRUE)) { stop("Package \"stats\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("BBmisc", quietly = TRUE)) { stop("Package \"BBmisc\" needed for this function to work. Please install it.", call. = FALSE)}
   #check method and return
   if (method!="mean" & method!="median" & method!="number"){stop("Choose normalization method")}
   if (return!="vector" & return!="replace" & return!="add.near" & return!="add.end" ){stop("Choose return object")}
@@ -547,6 +571,9 @@ rate_DF <- function (data, rate.var, weights, return = "add", as.percent = FALSE
 #' @export
 read_and_unite_files <- function (path, pattern, sep = ";", header = TRUE,
                                   add.file.id = FALSE, file.id = NULL, unique = FALSE){
+  # test package dependencies
+  if (!requireNamespace("utils", quietly = TRUE)) { stop("Package \"utils\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   files<-list.files(path=path, pattern=pattern) # list of files in directory
   # define files id
   if (add.file.id==TRUE){
@@ -621,6 +648,9 @@ read_and_unite_files <- function (path, pattern, sep = ";", header = TRUE,
 read_from_table_file<-function(file, choose.columns=FALSE, column.names,
                                select=FALSE, select.column.name, select.val, unique = FALSE,
                                sep=";", header = TRUE){
+  # test package dependencies
+  if (!requireNamespace("utils", quietly = TRUE)) { stop("Package \"utils\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   if(file.exists(file)==FALSE){stop("No such file")} # file exists
   data<-utils::read.table(file, header=header, sep=sep)
   # select rows

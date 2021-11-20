@@ -131,6 +131,12 @@ blast_local <- function (probe.var, probe.id.var = NULL, fasta.way = NULL,
                          mc.cores=1, add.query.info = FALSE, temp.db = NULL, delete.files = FALSE,
                          eval = 1000, ws = 7, reward = 1, penalty = -3, gapopen = 5, gapextend = 2, maxtargetseqs = 500,
                          verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("seqinr", quietly = TRUE)) { stop("Package \"seqinr\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("utils", quietly = TRUE)) { stop("Package \"utils\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("DBI", quietly = TRUE)) { stop("Package \"DBI\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("RSQLite", quietly = TRUE)) { stop("Package \"RSQLite\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
   #check temporal database
   if (add.query.info == TRUE){
     if (is.null(temp.db)==TRUE){stop ("Set temp.db name and path")}
@@ -250,7 +256,11 @@ fill_blast_results<-function(blast.result, AcNum.column.name="Racc", GI.column.n
                              add.gi.db = NULL, add.gi.table = NULL,
                              add.gi.ac.column.name="AC", add.gi.gi.column.name="GI",
                              mc.cores=1, verbose = TRUE){
-  #check parameters
+  # test package dependencies
+  if (!requireNamespace("DBI", quietly = TRUE)) { stop("Package \"DBI\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("RSQLite", quietly = TRUE)) { stop("Package \"RSQLite\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
+  #  check parameters
   if (add.gi!="DB" & add.gi!="DF"){stop("Choose add.gi parameter")}
   if (add.gi == "DF"){
     if (is.null(temp.db)==TRUE){stop ("Set temp.db name and path")}
@@ -297,6 +307,9 @@ fill_blast_results<-function(blast.result, AcNum.column.name="Racc", GI.column.n
 #'@describeIn fill_blast_result Remove accession version suffix
 #'@export
 delete_AcNum_version <- function (ac.num.var, version.sep=".", mc.cores = 1){
+  # test package dependencies
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
+  # run
   racc.list<-parallel::mclapply(X=ac.num.var, FUN=function(x) strsplit(x=x, split=version.sep, fixed=TRUE)[[1]][1], mc.cores = mc.cores)
   result<-unlist(racc.list)
   return(result)}
@@ -449,6 +462,11 @@ summarize_blast_result <- function(sum.aligned  ="sp", blast.probe.id.var, blast
                                   alignment.table.nonsp = NULL, change.colnames.dots = TRUE,
                                   file.sp.aligned = NULL, file.sp.not.aligned = NULL, file.nonsp = NULL,
                                   verbose = TRUE){
+  # test package dependencies
+  if (!requireNamespace("utils", quietly = TRUE)) { stop("Package \"utils\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("DBI", quietly = TRUE)) { stop("Package \"DBI\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("RSQLite", quietly = TRUE)) { stop("Package \"RSQLite\" needed for this function to work. Please install it.", call. = FALSE)}
+  if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
   #check settings
   if (verbose) message ("Checking settings")
   if (add.blast.info == TRUE){if (is.data.frame(data.blast.info) == FALSE){stop("data.blast.info must be a data frame")}}
