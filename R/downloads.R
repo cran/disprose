@@ -93,12 +93,15 @@ get_GIs<-function(org.name, db, n.start = 1, n.stop = NULL, step = 99999,
   if (.Platform$OS.type == "windows"){
     if (exists(temp.dir) == FALSE){dir.create(temp.dir)}
     for (i in 1:length(sequ)){
+      try({
       suppressWarnings(URL<-reutils::getUrl(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step)))
       curl::curl_download(URL, destfile=paste0(temp.dir, "\\gis", i))
       if (verbose)cat(sequ[i]+step, "GIs downloaded\r") # download message
       gifile<-XML::xmlToList(paste0(temp.dir, "\\gis", i))
-      res[[i]]<-try(as.character(unlist(gifile[[which(names(gifile)=="IdList")]]))) # take IdList from file and unlist it
-      if (delete.temp == TRUE){file.remove(paste0(temp.dir, "\\gis", i))}
+      res[[i]]<-as.character(unlist(gifile[[which(names(gifile)=="IdList")]])) # take IdList from file and unlist it
+      })
+      if (delete.temp == TRUE & file.exists(paste0(temp.dir, "\\gis", i))){
+        file.remove(paste0(temp.dir, "\\gis", i))}
     }
   }
   # check.result == TRUE
@@ -155,11 +158,14 @@ get_GIs_fix<-function(gis.list, org.name, db, n.start = 1, n.stop = NULL, step =
         # for windows
         if (.Platform$OS.type == "windows"){
           if (exists(temp.dir) == FALSE){dir.create(temp.dir)}
+          try({
           suppressWarnings(URL<-reutils::getUrl(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step)))
           curl::curl_download(URL, destfile=paste0(temp.dir, "\\gis", i))
           gifile<-XML::xmlToList(paste0(temp.dir, "\\gis", i))
-          gis.list[[i]]<-try(as.character(unlist(gifile[[which(names(gifile)=="IdList")]]))) # take IdList from file and unlist it
-          if (delete.temp == TRUE){file.remove(paste0(temp.dir, "\\gis", i))}}
+          gis.list[[i]]<-as.character(unlist(gifile[[which(names(gifile)=="IdList")]])) # take IdList from file and unlist it
+          })
+          if (delete.temp == TRUE  & file.exists(paste0(temp.dir, "\\gis", i))){
+            file.remove(paste0(temp.dir, "\\gis", i))}}
         # check the new gis.list [[i]] and final messages
         ifelse ({is.na(gis.list[[i]]) == TRUE | class(gis.list[[i]])[1]=="try-error"},
                 if (verbose) message ("Block ", i, " is not fixed"),
@@ -263,11 +269,11 @@ get_seq_info <- function (org.name, db, n.start = 1, n.stop = NULL, step = 500,
          {ifelse (return.dataframe==FALSE,
                   {if (verbose) message ("Everything seems fine, the result is returned as list")
                     return(res)}, #return list as set
-                  {if (verbose) message ("Everything seems fine, the result is transfered as data frame") # transfer list to data frame
+                  {if (verbose) message ("Everything seems fine, transferring result list to data frame") # transfer list to data frame
                     # for step = 1 no unlisting
                     if (step==1){
-                      res.data<-info_listtodata(info.list = res, unlist=FALSE)
-                      } else{res.data<-info_listtodata(info.list = res, unlist=TRUE)}
+                      res.data<-info_listtodata(info.list = res, unlist=FALSE, verbose = verbose)
+                      } else{res.data<-info_listtodata(info.list = res, unlist=TRUE, verbose = verbose)}
                     return(res.data)})})
 }
 
@@ -308,7 +314,8 @@ get_seq_info_fix<-function(info.list, web.history = NULL, org.name = NULL, db,
 #'@describeIn get_seq_info Transforms downloaded list into data frame.
 #'@export
 #'
-info_listtodata<-function(info.list, unlist = TRUE){
+info_listtodata<-function(info.list, unlist = TRUE, verbose = TRUE){
+  save.list<-info.list # save list for possible problems to return result as list
   if (unlist==TRUE){ #unlisting
     info.list2<-list(); for (i in 1:length(info.list)){info.list2<-append(info.list2, info.list[[i]])}
     info.list<-info.list2}
@@ -345,11 +352,16 @@ info_listtodata<-function(info.list, unlist = TRUE){
     ifelse(("isolation_source" %in% subtype)==TRUE, isolation_source[i]<-subname[[which(subtype=="isolation_source")[1]]], isolation_source[i]<-NA)
     ifelse(("collection_date" %in% subtype)==TRUE, collection_date[i]<-subname[[which(subtype=="collection_date")[1]]], collection_date[i]<-NA)
   }
-  res.data<-data.frame(uid, gi, GB_AcNum, createdate, updatedate, source_db, organism, title, strain, taxid,
-                       length, biomol, moltype, genome, complete, geneticcode, strand,
-                       host, country, isolation_source, collection_date) # genome info data
-  rownames(res.data)<-NULL
-  return(res.data)
+  res.data<-try(data.frame(uid, gi, GB_AcNum, createdate, updatedate, source_db, organism, title, strain, taxid,
+                           length, biomol, moltype, genome, complete, geneticcode, strand,
+                           host, country, isolation_source, collection_date), silent=TRUE )# genome info data
+  if(is.data.frame(res.data)){if  (verbose){message("The result is returned as data frame")}
+    rownames(res.data)<-NULL
+    return(res.data)}
+  if (is.data.frame(res.data) == FALSE){if  (verbose){
+    message("It seems there are some problems with metadata format, the result is returned as list")}
+    return(save.list)}
+
 }
 
 #'

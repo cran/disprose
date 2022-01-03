@@ -1,10 +1,10 @@
-df8e478854aa2d8e1502555a22eed659 *DESCRIPTION
+b0335ccc2c0a09edc310bbb62ef27d71 *DESCRIPTION
 384e31a308df2aa7c50f02dd965476f9 *NAMESPACE
-a3a2a9d9b5c2983c3710362fd969ea9e *NEWS.md
+f8c2842e5086364aace4eae9ff8be90d *NEWS.md
 434e1b323808965523f76669d08e48df *R/blast.R
 dee9ac4708238df0ca61871f2fff2942 *R/common.R
 c91fb74074315eca46c8c0920ce63dfc *R/data.R
-c6ca06313858cdfad9c8cb7718d441f8 *R/downloads.R
+fa5eb3096a668e700dd76af50cd23e77 *R/downloads.R
 699590dfa68be354758b6cf50eedc780 *R/probes.R
 d35bbfacbf8344ffad0efa6ad234e83b *data/ann.data.rda
 11e6d73cb66498669f599f004dfed8cf *data/blast.fill.rda
@@ -25,7 +25,7 @@ a39356a3431ec6a9fa21e640f10c3820 *man/fill_blast_result.Rd
 6ebcc046ba398bfb0ab5f363fabf46d3 *man/get_GA_files.Rd
 4f492b2a4c6c1f1dff9b28ecaa0be6e6 *man/get_GIs.Rd
 0597b976be26bd895edc3ffd599cdabf *man/get_seq_for_DB.Rd
-29a15f407d0ca4cce0cfea28d3462b39 *man/get_seq_info.Rd
+7e446a15725241885f719baa461f0361 *man/get_seq_info.Rd
 96cdb30f9a9feb9e963ba51322e7084a *man/make_blast_DB.Rd
 d0749b0eb5dae2279d3974bcec09b7ed *man/make_ids.Rd
 66a583accde74122ef84b418df5e0bcd *man/meta.all.Rd

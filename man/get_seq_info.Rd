@@ -30,7 +30,7 @@ get_seq_info_fix(
   verbose = TRUE
 )
 
-info_listtodata(info.list, unlist = TRUE)
+info_listtodata(info.list, unlist = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{org.name}{character; scientific name or taxon identifier (written as "txid0000") of the organism/taxon.}
