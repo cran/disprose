@@ -78,7 +78,8 @@ get_GIs<-function(org.name, db, n.start = 1, n.stop = NULL, step = 99999,
   # variables for query
   n.start<-n.start-1 # numeration starts with zero
   if (is.null(term)==TRUE){term<-paste(org.name, "[Organism]", sep="")}
-  if (is.null(n.stop)==TRUE){n.stop<-rentrez::entrez_search(db=db, term=term, retmax=0)$count}
+  if (is.null(n.stop)==TRUE){n.stop<-try(rentrez::entrez_search(db=db, term=term, retmax=0)$count)}
+  if (class(n.stop) == "try-error"){stop("Could not connect to server. Please try again.")}
   if(n.stop==0){stop("No sequences found")} # wrong term
   n.stop<-n.stop-1 # numeration starts with zero
   sequ<-seq(n.start, n.stop, step) # cutting query blocks
@@ -141,7 +142,8 @@ get_GIs_fix<-function(gis.list, org.name, db, n.start = 1, n.stop = NULL, step =
   if (verbose) message ("Checking mistakes in ", length(gis.list), " blocks") # start message
   n.start<-n.start-1 # numeration starts with zero
   if (is.null(term)==TRUE){term<-paste(org.name, "[Organism]", sep="")}
-  if (is.null(n.stop)==TRUE){n.stop<-rentrez::entrez_search(db=db, term=term, retmax=0)$count}
+  if (is.null(n.stop)==TRUE){n.stop<-try(rentrez::entrez_search(db=db, term=term, retmax=0)$count)}
+  if (class(n.stop) == "try-error"){stop("Could not connect to server. Please try again.")}
   if(n.stop==0){stop("No sequences found")} # wrong term
   n.stop<-n.stop-1 # numeration starts with zero
   sequ<-seq(n.start, n.stop, step) # cutting query blocks
@@ -246,7 +248,8 @@ get_seq_info <- function (org.name, db, n.start = 1, n.stop = NULL, step = 500,
   on.exit(options(old.ops), add=T)
   options(scipen = 999)
   if (is.null(term)==TRUE){term<-paste(org.name, "[Organism]", sep="")} # search term
-  web.search<- rentrez::entrez_search(db=db, term=term, use_history=TRUE)
+  web.search<- try(rentrez::entrez_search(db=db, term=term, use_history=TRUE))
+  if (class(web.search)[1] == "try-error"){stop("Could not connect to server. Please try again.")}
   if (is.null(n.stop)==TRUE) {n.stop<-web.search$count}
   if(n.stop==0){stop("No sequences found")} # wrong term
   n.start<-n.start-1 ; n.stop<-n.stop-1 # numeration starts with zero
@@ -291,7 +294,8 @@ get_seq_info_fix<-function(info.list, web.history = NULL, org.name = NULL, db,
   options(scipen = 999)
   if (is.null(web.history)==TRUE){ # make history if none available
     if (is.null(term)==TRUE){term<-paste(org.name, "[Organism]", sep="")} # search term
-    web.history<- rentrez::entrez_search(db=db, term=term, use_history=TRUE)}
+    web.history<- try(rentrez::entrez_search(db=db, term=term, use_history=TRUE))}
+  if (class(web.history)[1] == "try-error"){stop("Could not connect to server. Please try again.")}
   if (is.null(n.stop)==TRUE) {n.stop<-web.history$count}
   if(n.stop==0){stop("No sequences found")} # wrong term
   n.start<-n.start-1 ; n.stop<-n.stop-1 # numeration starts with zero
@@ -619,8 +623,9 @@ annotate_probes<-function(source = "data.frame", ann.data=NULL, gff.path=NULL,
   if (file.exists(file.annot)){warning ("Note that ", file.annot, " file already exists. Overwritting file.")} # if file exists already
   #get reference genome table
   if (source =="load"){ # load from NCBI
-    annot.path<-biomartr:: getGFF(db=db, organism=org.name, reference = refs)
-    annot.table<-biomartr::read_gff(annot.path)}
+    annot.path<-try(biomartr:: getGFF(db=db, organism=org.name, reference = refs))
+    annot.table<-try(biomartr::read_gff(annot.path))
+    if (class(annot.table)[1] == "try-error"){stop("Could not download annotation files. Please try again.")}}
   if (source =="giff"){annot.table<-biomartr::read_gff(gff.path)} # from giff file
   if (source =="data.frame"){annot.table<-ann.data} # from data.frame
   starts<-annot.table$start; stops<-annot.table$end

@@ -72,7 +72,8 @@ cut_probes <- function (ref.seq.from.file = FALSE, ref.seq.id, ref.seq.db, fasta
   if (ref.seq.from.file==FALSE){ # read from NCBI if there is no fasta
     if (file.exists(fasta.file) == TRUE) {warning (paste0("FASTA ", fasta.file, " already exists. New sequences will be added to file."))}
     if (verbose) message ("Downloading and writing reference sequence to ", fasta.file)
-    for (i in 1:length(ref.seq.id)){reference<-rentrez::entrez_fetch(db=ref.seq.db, id=ref.seq.id[i], rettype="fasta")
+    for (i in 1:length(ref.seq.id)){reference<-try(rentrez::entrez_fetch(db=ref.seq.db, id=ref.seq.id[i], rettype="fasta"))
+    if (class(reference)[1] == "try-error"){stop("Could not download sequence. Please try again.")}
     write(x=reference, file=fasta.file, append = T)}}
   #read fasta file and make ids
   ref.seq.list<-seqinr::read.fasta(file=fasta.file, as.string = TRUE)
