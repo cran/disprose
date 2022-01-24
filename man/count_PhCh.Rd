@@ -26,7 +26,12 @@ count_PhCh(
   TD.params = NULL,
   TMmin = 55,
   TMmax = 60,
-  verbose = TRUE
+  verbose = TRUE,
+  Na = 50,
+  K = 0,
+  Tris = 0,
+  Mg = 0,
+  dNTPs = 0
 )
 
 count_GC(
@@ -75,7 +80,12 @@ count_TM(
   data,
   digits = 4,
   mc.cores = 1,
-  verbose = TRUE
+  verbose = TRUE,
+  Na = 50,
+  K = 0,
+  Tris = 0,
+  Mg = 0,
+  dNTPs = 0
 )
 }
 \arguments{
@@ -111,6 +121,16 @@ See \link[TmCalculator]{Tm_NN} for details.}
 \item{TMmin, TMmax}{numeric; minimum and maximum value of melting temperature (used if \code{trim = TRUE})}
 
 \item{verbose}{logical; show messages}
+
+\item{Na}{numeric; millimolar concentration of Na, default is 50 (used for \code{count_TM} function)}
+
+\item{K}{numeric; millimolar concentration of K, default is 0 (used for \code{count_TM} function)}
+
+\item{Tris}{numeric; millimolar concentration of Tris, default is 0 (used for \code{count_TM} function)}
+
+\item{Mg}{numeric; millimolar concentration of Mg, default is 0 (used for \code{count_TM} function)}
+
+\item{dNTPs}{numeric; millimolar concentration of dNTPs, default is 0 (used for \code{count_TM} function)}
 
 \item{add.to.data, data}{logical; add result vector to specified data frame (used unconditionally if \code{trim = TRUE})}
 }

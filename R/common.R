@@ -21,7 +21,7 @@
 #'@details
 #'This functions help to store big data frames in SQLite database which makes it faster to save and read the data.
 #'
-#'This function creates SQLlite connection to database, performes the task and then disconnects.
+#'This function creates SQLlite connection to database, fulfills the task and then disconnects.
 #'If no database has been created yet, creates one.
 #'
 #'Do not use \code{overwrite = TRUE} if table does not exists.

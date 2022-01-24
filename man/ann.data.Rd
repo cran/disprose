@@ -11,7 +11,7 @@ A data frame with 2218 rows and 9 variables:
   \item{source}{source database name}
   \item{type}{type of annotated region}
   \item{start}{region's start position}
-  \item{end}{regoin's end position}
+  \item{end}{region's end position}
   \item{score}{score}
   \item{strand}{strand}
   \item{phase}{phase}

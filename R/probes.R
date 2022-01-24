@@ -139,6 +139,11 @@ cut_probes <- function (ref.seq.from.file = FALSE, ref.seq.id, ref.seq.db, fasta
 #'@param delete.MFE.files logical; delete RNAfold input and output files
 #'@param add.to.data,data logical; add result vector to specified data frame (used unconditionally if \code{trim = TRUE})
 #'@param verbose logical; show messages
+#'@param Na numeric; millimolar concentration of Na, default is 50 (used for \code{count_TM} function)
+#'@param K numeric; millimolar concentration of K, default is 0 (used for \code{count_TM} function)
+#'@param Tris numeric; millimolar concentration of Tris, default is 0 (used for \code{count_TM} function)
+#'@param Mg numeric; millimolar concentration of Mg, default is 0 (used for \code{count_TM} function)
+#'@param dNTPs numeric; millimolar concentration of dNTPs, default is 0 (used for \code{count_TM} function)
 #'
 #'@details
 #' GC-content trimming selects results that are between \code{GCmin} and \code{GCmax} (inclusive).
@@ -218,7 +223,8 @@ NULL
 
 count_PhCh <- function (probe.var, trim = FALSE, data, digits = 4, mc.cores = 1, MFE.files.dir = NULL, delete.MFE.files = FALSE,
                      GCmin = 40, GCmax = 60, nucl.pattern = c ("a", "t", "g", "c"), n.crit = 5, RNAfold.path, temperature = 40, MFEmin = -3,
-                     TD.params = NULL, TMmin = 55, TMmax = 60, verbose = TRUE){
+                     TD.params = NULL, TMmin = 55, TMmax = 60, verbose = TRUE,
+                     Na = 50, K = 0, Tris = 0, Mg = 0, dNTPs=0){
   # test package dependencies
   if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
   if (!requireNamespace("stringr", quietly = TRUE)) { stop("Package \"stringr\" needed for this function to work. Please install it.", call. = FALSE)}
@@ -245,7 +251,7 @@ count_PhCh <- function (probe.var, trim = FALSE, data, digits = 4, mc.cores = 1,
   data<-cbind.data.frame(data, MFE)}
   if (verbose) message ("Counting melting temperature")
   TM<-count_TM(probe.var = probe.var, TD.params = TD.params, trim.tm = FALSE, add.to.data = FALSE, digits=digits,
-               mc.cores = mc.cores, verbose = verbose)
+               mc.cores = mc.cores, verbose = verbose, Na = Na, K = K, Tris = Tris, Mg = Mg, dNTPs=dNTPs)
   if(trim==TRUE){nums<-which(TM>=TMmin & TM<=TMmax)
   probe.var<-probe.var[nums]; TM<-TM[nums]; data<-data[nums,]
   data<-cbind.data.frame(data, TM)}
@@ -359,7 +365,8 @@ count_MFE <- function (probe.var, RNAfold.path, temperature = 40, trim.mfe = FAL
 #'@describeIn count_PhCh Calculates melting temperature
 #'@export
 count_TM <- function (probe.var, TD.params = NULL, trim.tm = FALSE, TMmin = 55, TMmax = 60,
-                      add.to.data = FALSE, data, digits = 4, mc.cores = 1, verbose = TRUE){
+                      add.to.data = FALSE, data, digits = 4, mc.cores = 1, verbose = TRUE,
+                      Na = 50, K = 0, Tris = 0, Mg = 0, dNTPs=0){
   # test package dependencies
   if (!requireNamespace("parallel", quietly = TRUE)) { stop("Package \"parallel\" needed for this function to work. Please install it.", call. = FALSE)}
   if (!requireNamespace("TmCalculator", quietly = TRUE)) { stop("Package \"TmCalculator\" needed for this function to work. Please install it.", call. = FALSE)}
@@ -372,9 +379,10 @@ count_TM <- function (probe.var, TD.params = NULL, trim.tm = FALSE, TMmin = 55, 
     if(class(TD.params)!="character"){warning ("Mistake in thermodynamic values in TD.param. Setting nn_table = DNA_NN4, tmm_table = DNA_TMM1, imm_table = DNA_IMM1, de_table = DNA_DE1")
       TD.params=c("DNA_NN4", "DNA_TMM1", "DNA_IMM1", "DNA_DE1")}}
   # run Tm
-  TM<-parallel::mclapply(X=probe.var, FUN=function(x) TmCalculator::Tm_NN(ntseq=x, nn_table = TD.params[1], tmm_table = TD.params[2],
-                                                                         imm_table = TD.params[3], de_table = TD.params[4]), mc.cores=mc.cores)
-  TM<-unlist(TM, use.names=FALSE) # list to vector
+  TM.list<-parallel::mclapply(X=probe.var, FUN=function(x) TmCalculator::Tm_NN(ntseq=x, nn_table = TD.params[1], tmm_table = TD.params[2],
+                                                                               imm_table = TD.params[3], de_table = TD.params[4],
+                                                                               Na = Na, K = K, Tris = Tris, Mg = Mg, dNTPs = dNTPs), mc.cores=mc.cores)
+  TM<-c(); for (i in 1:length(TM.list)){TM[i]<-TM.list[[i]][[1]]} # get TM from list
   TM<-round(TM, digits=digits)
   #return
   if(trim.tm==FALSE){ifelse(add.to.data==FALSE, return(TM), { # no trimming. return vector or data
