@@ -58,7 +58,7 @@ table name and name of columns with accession and GI numbers (used if \code{add.
 \code{blast.result} data frame with added GI and deleted accession version suffix.
 }
 \description{
-Provides subjects' Genbank Identifiers if BLAST alignment result does not contain one.
+Provides subjects' GenInfo Identifiers if BLAST alignment result does not contain one.
 }
 \details{
 BLAST alignment, performed with local database, may not contain subject GI information. Also subject accession may contain version suffix.

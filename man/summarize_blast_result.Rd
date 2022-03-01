@@ -90,7 +90,7 @@ SQLite database name and path, tables names (used if \code{write.alignment = "DB
 }
 \value{
 List of data frames with alignment summary and report for each probe or
-data frame with summary for all probes (alignment reports are written into files or SQLite database tables)/
+data frame with summary for all probes (alignment reports are written into files or SQLite database tables).
 }
 \description{
 Summarize aligned, not aligned and undesirably aligned sequences

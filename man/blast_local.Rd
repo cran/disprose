@@ -74,8 +74,7 @@ Perform nucleotide BLAST with local database
 \details{
 For this function BLAST+ executables (blastn) must be installed and local nucleotide database must be created.
 
-While working, the function creates blastn input FASTA file and output file. If no \code{fasta.way} and \code{out.way} are provided,
-"blast_fasta.fsa" and "blast_result.out" files are created in working directory. If files exist already, they will be overwritten.
+While working, the function creates blastn input FASTA file and output file. If files exist already, they will be overwritten.
 Those files could be deleted by \code{delete.files = TRUE} parameter.
 
 If no \code{probe.id.var} is provided, query sequences are numbered in order, starting with 1.

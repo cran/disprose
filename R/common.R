@@ -138,7 +138,7 @@ read_from_DB <- function (database, table, choose.columns=FALSE, column.names,
   if (choose.columns == FALSE){columns.note<-"*"} else { columns.note<-paste(column.names, collapse=", ") }
   #select
   if (select == TRUE){
-    if (class(select.val)=="character"){select.val<-paste("\"", select.val, "\"", sep="")} # add quotes for characters
+    if (inherits(select.val, "character")){select.val<-paste("\"", select.val, "\"", sep="")} # add quotes for characters
     select.val<-paste(select.val, collapse=", ")
     select.note<-paste("WHERE", select.column.name, "IN (", select.val, ")", sep=" ")} else {select.note<-""}
   #unique

@@ -1,3 +1,6 @@
+# disprose 0.1.5
+* Bugs fixed: functions that use Internet resources catch server side errors.
+
 # disprose 0.1.4
 
 * Added default salt concentrations for functions that calculates probes' thermodynamic properties.

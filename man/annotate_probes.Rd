@@ -74,7 +74,7 @@ If retrieval is not available, GFF file may be used.
 This function creates annotation ".txt" or ".csv" file. By default file is created in working directory.
 Optionally function returns annotation resume, i.e. annotation attribute for specified sequence ontology (SO).
 Priorities of SOs are set by user in \code{priopity} parameter.
-For example, if \code{priopity = c("CDS", "gene", "region")}, the function returns resume for "CDS" CO, if there are none - for
+For example, if \code{priopity = c("CDS", "gene", "region")}, the function returns resume for "CDS" SO, if there are none - for
 "gene" CO etc.
 If there are several attributes meet \code{priority}, the first annotation attribute is returned.
 If none of \code{priority} COs found, the first annotation attribute is returned.

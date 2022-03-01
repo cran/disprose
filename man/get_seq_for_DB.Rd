@@ -56,7 +56,6 @@ Master records (for example, in WGS-project) do not contain any nucleotide.
 They might be excluded from download with \code{exclude.from.download} parameters.
 However this has no affect and such ids do not have to be excluded when loading.
 
-If no \code{fasta.file} value is provided, "seq.fasta" file is created in working directory.
 If writing FASTA to existing FASTA file, sequences are appended.
 }
 \section{Functions}{

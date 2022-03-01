@@ -80,8 +80,7 @@ make_blast_DB <- function (makeblastdb.way, fasta.way, db.way, db.type = "nucl",
 #'@details
 #'For this function BLAST+ executables (blastn) must be installed and local nucleotide database must be created.
 #'
-#' While working, the function creates blastn input FASTA file and output file. If no \code{fasta.way} and \code{out.way} are provided,
-#' "blast_fasta.fsa" and "blast_result.out" files are created in working directory. If files exist already, they will be overwritten.
+#' While working, the function creates blastn input FASTA file and output file. If files exist already, they will be overwritten.
 #' Those files could be deleted by \code{delete.files = TRUE} parameter.
 #'
 #' If no \code{probe.id.var} is provided, query sequences are numbered in order, starting with 1.
@@ -176,7 +175,7 @@ blast_local <- function (probe.var, probe.id.var = NULL, fasta.way = NULL,
     index_DB(database = temp.db, table = "probe", index.unique = TRUE, index.column.name = "id")
     #get probes sequence
     get.info.one<-function(res.id){
-      if (class(res.id)=="character"){res.id<-paste("\"", res.id, "\"", sep="")} # add quotes for characters
+      if (inherits(res.id, "character")){res.id<-paste("\"", res.id, "\"", sep="")} # add quotes for characters
       conn <- DBI::dbConnect (RSQLite::SQLite (), temp.db)
       on.exit(DBI::dbDisconnect (conn), add=T)
       query=paste("SELECT probe FROM probe WHERE id =", res.id, sep=" ")
@@ -195,7 +194,7 @@ blast_local <- function (probe.var, probe.id.var = NULL, fasta.way = NULL,
 
 #' Complement BLAST result
 #'
-#' Provides subjects' Genbank Identifiers if BLAST alignment result does not contain one.
+#' Provides subjects' GenInfo Identifiers if BLAST alignment result does not contain one.
 #'
 #'@param blast.result data frame; BLAST alignment result
 #'@param AcNum.column.name,GI.column.name character; name of column with subject
@@ -287,7 +286,7 @@ fill_blast_results<-function(blast.result, AcNum.column.name="Racc", GI.column.n
     add.gi.gi.column.name="GI"; add.gi.ac.column.name="AC"}
   #one result func
   gi.one<-function(ac, database, table){
-    if (class(ac)=="character"){ac<-paste("\"", ac, "\"", sep="")} # add quotes for characters
+    if (inherits(ac, "character")){ac<-paste("\"", ac, "\"", sep="")} # add quotes for characters
     conn <- DBI::dbConnect (RSQLite::SQLite (), database)
     on.exit(DBI::dbDisconnect (conn), add=T)
     query=paste("SELECT", add.gi.gi.column.name, "FROM", table, "WHERE", add.gi.ac.column.name, "=", ac, sep=" ")
@@ -393,7 +392,7 @@ delete_AcNum_version <- function (ac.num.var, version.sep=".", mc.cores = 1){
 #'Function will stop if same database already exists, so deleting temporal database is highly recommended.
 #'
 #'@return List of data frames with alignment summary and report for each probe or
-#' data frame with summary for all probes (alignment reports are written into files or SQLite database tables)/
+#' data frame with summary for all probes (alignment reports are written into files or SQLite database tables).
 #'
 #'@examples
 #'path <- tempdir()
@@ -525,7 +524,7 @@ summarize_blast_result <- function(sum.aligned  ="sp", blast.probe.id.var, blast
       switch.one<-function(id, return=c("newid", "title")){
         conn <- DBI::dbConnect (RSQLite::SQLite (), temp.db)
         on.exit(DBI::dbDisconnect (conn), add=T)
-        if (class(id)=="character"){id<-paste("\"", id, "\"", sep="")} # add quotes for characters
+        if (inherits(id, "character")){id<-paste("\"", id, "\"", sep="")} # add quotes for characters
         query=paste("SELECT * FROM switch WHERE old =", id, sep=" ")
         new<-DBI::dbGetQuery(conn, query)
         if (return=="newid"){return(new$new)};if (return=="title"){return(new$title)} }
@@ -551,7 +550,7 @@ summarize_blast_result <- function(sum.aligned  ="sp", blast.probe.id.var, blast
       query<-paste("SELECT ids FROM blast WHERE probe = \"", probe, "\"", sep="") # all result nums for one probe
       did.get<-DBI::dbGetQuery(conn, query)
       did.get<-did.get[,1] # got numbers --- choose only sp. from them
-      if (class(did.get)=="character"){did.get<-paste("\"", did.get, "\"", sep="")} # add quotes for characters
+      if (inherits(did.get, "character")){did.get<-paste("\"", did.get, "\"", sep="")} # add quotes for characters
       did.get.paste<-paste(did.get, collapse=", ")
       query1<-paste("SELECT ids FROM refs WHERE ids IN (", did.get.paste, ")", sep="")
       query2<-paste("SELECT * FROM blast WHERE probe = \"", probe, "\" AND ids in (", query1, ")", sep="")
@@ -602,7 +601,7 @@ summarize_blast_result <- function(sum.aligned  ="sp", blast.probe.id.var, blast
       blast.one<-DBI::dbGetQuery(conn, query)
       did.get<-unique(blast.one[,1])
       # query all but them
-      if (class(did.get)=="character"){did.get<-paste("\"", did.get, "\"", sep="")} # add quotes for characters
+      if (inherits(did.get, "character")){did.get<-paste("\"", did.get, "\"", sep="")} # add quotes for characters
       did.get.paste<-paste(did.get, collapse=", ")
       query<-paste("SELECT * FROM refs WHERE NOT ids IN (", did.get.paste, ")",sep="")
       didnot.get<-DBI::dbGetQuery(conn, query)
@@ -700,7 +699,7 @@ summarize_blast_result <- function(sum.aligned  ="sp", blast.probe.id.var, blast
       switch.one<-function(id, return=c("newid", "title")){
         conn <- DBI::dbConnect (RSQLite::SQLite (), temp.db)
         on.exit(DBI::dbDisconnect (conn), add=T)
-        if (class(id)=="character"){id<-paste("\"", id, "\"", sep="")} # add quotes for characters
+        if (inherits(id, "character")){id<-paste("\"", id, "\"", sep="")} # add quotes for characters
         query=paste("SELECT * FROM switch WHERE old =", id, sep=" ")
         new<-DBI::dbGetQuery(conn, query)
         if (return=="newid"){return(new$new)};if (return=="title"){return(new$title)} }
@@ -724,7 +723,7 @@ summarize_blast_result <- function(sum.aligned  ="sp", blast.probe.id.var, blast
       query<-paste("SELECT ids FROM blast2 WHERE probe = \"", probe, "\"", sep="") # all result nums for one probe
       did.get<-DBI::dbGetQuery(conn, query)
       did.get<-did.get[,1] # got numbers --- choose only nonsp. from them
-      if (class(did.get)=="character"){did.get<-paste("\"", did.get, "\"", sep="")} # add quotes for characters
+      if (inherits(did.get, "character")){did.get<-paste("\"", did.get, "\"", sep="")} # add quotes for characters
       did.get.paste<-paste(did.get, collapse=", ")
       query1<-paste("SELECT ids FROM refs2 WHERE ids IN (", did.get.paste, ")", sep="")
       query2<-paste("SELECT * FROM blast2 WHERE probe = \"", probe, "\" AND NOT ids in (", query1, ")", sep="")

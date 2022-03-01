@@ -43,7 +43,7 @@ get_GIs_fix(
 
 \item{step}{integer; download increment value.}
 
-\item{return.vector}{integer; whether to return GI numbers as character vector (another variant is list of vectors).}
+\item{return.vector}{logical; whether to return GI numbers as character vector (another variant is list of vectors).}
 
 \item{check.result}{logical; check if download was done correctly.}
 

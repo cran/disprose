@@ -8,7 +8,7 @@
 #'@param n.start integer; download starting value. Default is 1.
 #'@param n.stop integer; download finishing value. Default is NULL, which provides retrieval of all available GIs.
 #'@param step integer; download increment value.
-#'@param return.vector integer; whether to return GI numbers as character vector (another variant is list of vectors).
+#'@param return.vector logical; whether to return GI numbers as character vector (another variant is list of vectors).
 #'@param check.result logical; check if download was done correctly.
 #'@param term character; search query.
 #'@param temp.dir character; name and path of directory for downloaded temporary files (only for "Windows" OS)
@@ -79,7 +79,7 @@ get_GIs<-function(org.name, db, n.start = 1, n.stop = NULL, step = 99999,
   n.start<-n.start-1 # numeration starts with zero
   if (is.null(term)==TRUE){term<-paste(org.name, "[Organism]", sep="")}
   if (is.null(n.stop)==TRUE){n.stop<-try(rentrez::entrez_search(db=db, term=term, retmax=0)$count)}
-  if (class(n.stop) == "try-error"){stop("Could not connect to server. Please try again.")}
+  if (inherits (n.stop, "try-error") ){stop("Could not connect to server. Please try again.")}
   if(n.stop==0){stop("No sequences found")} # wrong term
   n.stop<-n.stop-1 # numeration starts with zero
   sequ<-seq(n.start, n.stop, step) # cutting query blocks
@@ -143,7 +143,7 @@ get_GIs_fix<-function(gis.list, org.name, db, n.start = 1, n.stop = NULL, step =
   n.start<-n.start-1 # numeration starts with zero
   if (is.null(term)==TRUE){term<-paste(org.name, "[Organism]", sep="")}
   if (is.null(n.stop)==TRUE){n.stop<-try(rentrez::entrez_search(db=db, term=term, retmax=0)$count)}
-  if (class(n.stop) == "try-error"){stop("Could not connect to server. Please try again.")}
+  if (inherits(n.stop, "try-error")){stop("Could not connect to server. Please try again.")}
   if(n.stop==0){stop("No sequences found")} # wrong term
   n.stop<-n.stop-1 # numeration starts with zero
   sequ<-seq(n.start, n.stop, step) # cutting query blocks
@@ -169,6 +169,7 @@ get_GIs_fix<-function(gis.list, org.name, db, n.start = 1, n.stop = NULL, step =
           if (delete.temp == TRUE  & file.exists(paste0(temp.dir, "\\gis", i))){
             file.remove(paste0(temp.dir, "\\gis", i))}}
         # check the new gis.list [[i]] and final messages
+        if (is.null(gis.list[[i]]) == TRUE) {gis.list[[i]]<-NA}
         ifelse ({is.na(gis.list[[i]]) == TRUE | class(gis.list[[i]])[1]=="try-error"},
                 if (verbose) message ("Block ", i, " is not fixed"),
                 if (verbose) message ("Block ", i, " is fixed "))
@@ -309,6 +310,7 @@ get_seq_info_fix<-function(info.list, web.history = NULL, org.name = NULL, db,
       if (sum(check[[i]])>0 | class(info.list[[i]])[1]=="try-error"){
         info.list[[i]]<-try(rentrez::entrez_summary(db=db, web_history=web.history$web_history, retmax=step, retstart=sequ[i]))
         #check the new info.list [[i]] and final messages
+        if (is.null(info.list[[i]]) == TRUE) {info.list[[i]]<-NA}
         ifelse ({is.na(info.list[[i]]) == TRUE | class(info.list[[i]])[1]=="try-error"},
                 if (verbose) message ("Block ", i, " is not fixed"),
                 if (verbose) message ("Block ", i, " is fixed"))}}}
@@ -390,7 +392,6 @@ info_listtodata<-function(info.list, unlist = TRUE, verbose = TRUE){
 #'They might be excluded from download with \code{exclude.from.download} parameters.
 #'However this has no affect and such ids do not have to be excluded when loading.
 #'
-#'If no \code{fasta.file} value is provided, "seq.fasta" file is created in working directory.
 #'If writing FASTA to existing FASTA file, sequences are appended.
 #'
 #'@return
@@ -454,12 +455,14 @@ get_seq_for_DB_fix <- function(res.data, db, verbose = TRUE){
   # test package dependencies
   if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
   for (i in 1:nrow(res.data)){
+    if (is.null(res.data$seqs[i]) == TRUE) {res.data$seqs[i]<-NA}
     if (is.na(res.data$seqs[i])==FALSE){ # NA try function from get_seqs_for_id returns in mistake; "\n" - is no seq (master record)
       if (res.data$seqs[i]=="no sequence" | res.data$seqs[i]=="\n"){
         if (verbose) message ("note ", i, " - ", res.data$ids[i], " no sequence")
       } else { if (verbose) message ("note ", i, " - ", res.data$ids[i], " sequence downloaded")}
     } else{
       try(res.data$seqs[i]<-rentrez::entrez_fetch(db=db, id=res.data$ids[i], rettype="fasta"))
+      if (is.null(res.data$seqs[i]) == TRUE) {res.data$seqs[i]<-NA}
       if (is.na(res.data$seqs[i])==FALSE) {
         if (verbose) message ("note ", i, " - ", res.data$ids[i], " sequence fixed")
       } else {if (verbose) message ("note ", i, " - ", res.data$ids[i], " sequence not fixed, try again")}
@@ -574,7 +577,7 @@ unite_NCBI_ac.nums <- function (data, ac.num.var, title.var, db.var, type = "sho
 #'This function creates annotation ".txt" or ".csv" file. By default file is created in working directory.
 #'Optionally function returns annotation resume, i.e. annotation attribute for specified sequence ontology (SO).
 #'Priorities of SOs are set by user in \code{priopity} parameter.
-#'For example, if \code{priopity = c("CDS", "gene", "region")}, the function returns resume for "CDS" CO, if there are none - for
+#'For example, if \code{priopity = c("CDS", "gene", "region")}, the function returns resume for "CDS" SO, if there are none - for
 #'"gene" CO etc.
 #'If there are several attributes meet \code{priority}, the first annotation attribute is returned.
 #'If none of \code{priority} COs found, the first annotation attribute is returned.
