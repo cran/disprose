@@ -1,10 +1,10 @@
-63ebd3b47631cd968bc383c3d431235f *DESCRIPTION
+2afd0932fca67818bcd285064ddbff70 *DESCRIPTION
 384e31a308df2aa7c50f02dd965476f9 *NAMESPACE
-c38dc1572c936c011f30613c35b9d511 *NEWS.md
+0a07b6b06bf1708e1cf76a5970a4d7be *NEWS.md
 6f515d135869c9acbb81be7890e7660a *R/blast.R
 8db09ad6c07575e00a5f7736ecbd1280 *R/common.R
 8b4ce82840991b62819600ae62a5f1b3 *R/data.R
-186e15909b0c5b1b6dd03c565e16f2a7 *R/downloads.R
+543cff45f712aece647cd1cdb0550b5a *R/downloads.R
 db7b258a2fb1817176579f2e454c3fb9 *R/probes.R
 d35bbfacbf8344ffad0efa6ad234e83b *data/ann.data.rda
 11e6d73cb66498669f599f004dfed8cf *data/blast.fill.rda

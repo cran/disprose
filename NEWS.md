@@ -1,3 +1,6 @@
+# disprose 0.1.6
+* Bugs fixed: functions that use Internet resources catch server side errors.
+
 # disprose 0.1.5
 * Bugs fixed: functions that use Internet resources catch server side errors.
 

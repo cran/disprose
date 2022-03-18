@@ -84,35 +84,35 @@ get_GIs<-function(org.name, db, n.start = 1, n.stop = NULL, step = 99999,
   n.stop<-n.stop-1 # numeration starts with zero
   sequ<-seq(n.start, n.stop, step) # cutting query blocks
   if (verbose) message ("Downloading GIs for ", n.stop-n.start+1, " sequences in ", length(sequ), " blocks") # start message
-  res<-list()
+  res<-vector( mode = "list", length = length(sequ))
   # for linux
   if (.Platform$OS.type != "windows"){
-    for (i in 1:length(sequ)){bind<-try(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step))
-    res[[i]]<-reutils::uid(bind)
+    for (i in 1:length(sequ)){bind<-tryCatch(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step),
+                                             error=function(err) NA)
+    res[[i]]<-tryCatch(reutils::uid(bind), error=function(err) NA)
     if(verbose) cat(sequ[i]+step, "GIs downloaded\r")}}  # download message
   # for windows
   if (.Platform$OS.type == "windows"){
     if (exists(temp.dir) == FALSE){dir.create(temp.dir)}
     for (i in 1:length(sequ)){
       try({
-      suppressWarnings(URL<-reutils::getUrl(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step)))
-      curl::curl_download(URL, destfile=paste0(temp.dir, "\\gis", i))
-      if (verbose)cat(sequ[i]+step, "GIs downloaded\r") # download message
-      gifile<-XML::xmlToList(paste0(temp.dir, "\\gis", i))
-      res[[i]]<-as.character(unlist(gifile[[which(names(gifile)=="IdList")]])) # take IdList from file and unlist it
+        suppressWarnings(URL<-reutils::getUrl(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step)))
+        curl::curl_download(URL, destfile=paste0(temp.dir, "\\gis", i))
+        if (verbose)cat(sequ[i]+step, "GIs downloaded\r") # download message
+        gifile<-XML::xmlToList(paste0(temp.dir, "\\gis", i))
+        res[[i]]<-as.character(unlist(gifile[[which(names(gifile)=="IdList")]])) # take IdList from file and unlist it
       })
       if (delete.temp == TRUE & file.exists(paste0(temp.dir, "\\gis", i))){
         file.remove(paste0(temp.dir, "\\gis", i))}
     }
+    #check try-error
+    for (j in 1:length(res)){if (class(res[[j]])[1]=="try-error" | is.null(res[[j]])){res[[j]]<-NA}}
   }
   # check.result == TRUE
   if (check.result==TRUE){res<-get_GIs_fix(gis.list=res, org.name=org.name, db=db, n.start=n.start+1,
                                            n.stop=n.stop+1, step=step, temp.dir = temp.dir, delete.temp = delete.temp,
                                            verbose = verbose)}
-  #check setup for Windows
-  if (.Platform$OS.type == "windows" & is.null(temp.dir) == TRUE) {stop ("Set directory for temporal files")}
-  #check try-error
-  for (j in 1:length(res)){if (class(res[[j]])[1]=="try-error"){res[[j]]<-NA}}
+
   #check empty blocks and return the result
   check<-lapply(X=res, FUN=is.na)
   ifelse(sum(unlist(check))>0,
@@ -148,35 +148,34 @@ get_GIs_fix<-function(gis.list, org.name, db, n.start = 1, n.stop = NULL, step =
   n.stop<-n.stop-1 # numeration starts with zero
   sequ<-seq(n.start, n.stop, step) # cutting query blocks
   #check try-error
-  for (j in 1:length(gis.list)){if (class(gis.list[[j]])[1]=="try-error"){res[[j]]<-NA}}
+  for (j in 1:length(gis.list)){if (class(gis.list[[j]])[1]=="try-error"){gis.list[[j]]<-NA}}
   check<-lapply(X=gis.list, FUN=is.na) # check empty
   if (sum(unlist(check))==0){if (verbose) message ("No mistakes found")}else{
     for (i in 1:length(gis.list)){
       if (sum(check[[i]])>0){
         # for linux
         if (.Platform$OS.type != "windows"){
-          bind<-try(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step))
-          gis.list[[i]]<-reutils::uid(bind)}
+          bind<-tryCatch(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step),
+                         error=function(err) NA)
+          gis.list[[i]]<-tryCatch(reutils::uid(bind), error=function(err) NA)}
         # for windows
         if (.Platform$OS.type == "windows"){
           if (exists(temp.dir) == FALSE){dir.create(temp.dir)}
           try({
-          suppressWarnings(URL<-reutils::getUrl(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step)))
-          curl::curl_download(URL, destfile=paste0(temp.dir, "\\gis", i))
-          gifile<-XML::xmlToList(paste0(temp.dir, "\\gis", i))
-          gis.list[[i]]<-as.character(unlist(gifile[[which(names(gifile)=="IdList")]])) # take IdList from file and unlist it
+            suppressWarnings(URL<-reutils::getUrl(reutils::esearch(db=db, term=term, retstart=sequ[i], retmax=step)))
+            curl::curl_download(URL, destfile=paste0(temp.dir, "\\gis", i))
+            gifile<-XML::xmlToList(paste0(temp.dir, "\\gis", i))
+            gis.list[[i]]<-as.character(unlist(gifile[[which(names(gifile)=="IdList")]])) # take IdList from file and unlist it
           })
+          if(class(gis.list[[i]])[1]=="try-error" | is.null(gis.list[[i]])){gis.list[[i]]<-NA}
           if (delete.temp == TRUE  & file.exists(paste0(temp.dir, "\\gis", i))){
             file.remove(paste0(temp.dir, "\\gis", i))}}
         # check the new gis.list [[i]] and final messages
-        if (is.null(gis.list[[i]]) == TRUE) {gis.list[[i]]<-NA}
-        ifelse ({is.na(gis.list[[i]]) == TRUE | class(gis.list[[i]])[1]=="try-error"},
-                if (verbose) message ("Block ", i, " is not fixed"),
-                if (verbose) message ("Block ", i, " is fixed "))
+        if (sum(is.na(gis.list[[i]]))==0){if (verbose) message ("Block ", i, " is fixed")}
+        if (sum(is.na(gis.list[[i]]))>0){if (verbose) message ("Block ", i, " is not fixed")}
       }}}
   return (gis.list)
 }
-
 #'
 #'Get NCBI sequence record
 #'
@@ -241,7 +240,7 @@ NULL
 #'@export
 
 get_seq_info <- function (org.name, db, n.start = 1, n.stop = NULL, step = 500,
-                       return.dataframe = FALSE, check.result = FALSE, term = NULL, verbose = TRUE){
+                          return.dataframe = FALSE, check.result = FALSE, term = NULL, verbose = TRUE){
   # test package dependencies
   if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
   # options
@@ -256,15 +255,14 @@ get_seq_info <- function (org.name, db, n.start = 1, n.stop = NULL, step = 500,
   n.start<-n.start-1 ; n.stop<-n.stop-1 # numeration starts with zero
   if (verbose) message (web.search$count, " sequences found, downloading records for sequences from ", n.start+1, " to ", n.stop+1)
   sequ<-seq(n.start, n.stop, step)
-  res<-list()
+  res<-vector( mode = "list", length = length(sequ))
   for( seq_start in sequ){
-    res[[match(seq_start, sequ)]]<-try(rentrez::entrez_summary(db=db, web_history=web.search$web_history, retmax=step, retstart=seq_start))
+    res[[match(seq_start, sequ)]]<-tryCatch(rentrez::entrez_summary(db=db, web_history=web.search$web_history, retmax=step, retstart=seq_start),
+                                            error=function(err) NA)
     if (verbose) cat(seq_start+step, "notes downloaded\r")
   }
   if (check.result==TRUE){res<-get_seq_info_fix(info.list = res, web.history = web.search, db=db, n.start=n.start+1, n.stop=n.stop+1,
                                                 step=step, verbose = verbose)}
-  #check try-error
-  for (j in 1:length(res)){if (class(res[[j]])[1]=="try-error"){res[[j]]<-NA}}
   #check empty blocks and return the result
   check<-lapply(X=res, FUN=is.na)
   ifelse(sum(unlist(check))>0,
@@ -277,10 +275,9 @@ get_seq_info <- function (org.name, db, n.start = 1, n.stop = NULL, step = 500,
                     # for step = 1 no unlisting
                     if (step==1){
                       res.data<-info_listtodata(info.list = res, unlist=FALSE, verbose = verbose)
-                      } else{res.data<-info_listtodata(info.list = res, unlist=TRUE, verbose = verbose)}
+                    } else{res.data<-info_listtodata(info.list = res, unlist=TRUE, verbose = verbose)}
                     return(res.data)})})
 }
-
 #'@describeIn get_seq_info Checks the downloads and tries to retrieve the compromised data.
 #'@export
 #'
@@ -301,22 +298,20 @@ get_seq_info_fix<-function(info.list, web.history = NULL, org.name = NULL, db,
   if(n.stop==0){stop("No sequences found")} # wrong term
   n.start<-n.start-1 ; n.stop<-n.stop-1 # numeration starts with zero
   sequ<-seq(n.start, n.stop, step)
-  #check try-error
-  for (j in 1:length(info.list)){if (class(info.list[[j]])[1]=="try-error"){info.list[[j]]<-NA}}
-  #second check - NAs in list
+  #check - NAs in list
   check<-lapply(X=info.list, FUN=is.na) # check empty
   if (sum(unlist(check))==0){if (verbose) message ("No mistakes found")}else{
     for (i in 1:length(info.list)){
-      if (sum(check[[i]])>0 | class(info.list[[i]])[1]=="try-error"){
-        info.list[[i]]<-try(rentrez::entrez_summary(db=db, web_history=web.history$web_history, retmax=step, retstart=sequ[i]))
+      if (sum(check[[i]])>0){ # if there is mistake in block i
+        info.list[[i]]<-tryCatch(rentrez::entrez_summary(db=db, web_history=web.history$web_history, retmax=step, retstart=sequ[i]),
+                                 error=function(err) NA)
         #check the new info.list [[i]] and final messages
-        if (is.null(info.list[[i]]) == TRUE) {info.list[[i]]<-NA}
-        ifelse ({is.na(info.list[[i]]) == TRUE | class(info.list[[i]])[1]=="try-error"},
-                if (verbose) message ("Block ", i, " is not fixed"),
-                if (verbose) message ("Block ", i, " is fixed"))}}}
+        if (sum(is.na(info.list[[i]]))==0){if (verbose) message ("Block ", i, " is fixed")}
+        if (sum(is.na(info.list[[i]]))>0){if (verbose) message ("Block ", i, " is not fixed")}
+      }
+    }}
   return (info.list)
 }
-
 #'@describeIn get_seq_info Transforms downloaded list into data frame.
 #'@export
 #'
@@ -413,8 +408,8 @@ NULL
 #'@describeIn get_seq_for_DB Retrieves NCBI nucleotide sequences for given identification numbers.
 #'@export
 get_seq_for_DB <- function (ids, db, check.result = FALSE, return="data.frame", fasta.file = NULL,
-                         exclude.from.download = FALSE, exclude.var, exclude.pattern, exclude.fixed = TRUE,
-                         verbose = TRUE){
+                            exclude.from.download = FALSE, exclude.var, exclude.pattern, exclude.fixed = TRUE,
+                            verbose = TRUE){
   # test package dependencies
   if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
   # check fasta file
@@ -455,7 +450,6 @@ get_seq_for_DB_fix <- function(res.data, db, verbose = TRUE){
   # test package dependencies
   if (!requireNamespace("rentrez", quietly = TRUE)) { stop("Package \"rentrez\" needed for this function to work. Please install it.", call. = FALSE)}
   for (i in 1:nrow(res.data)){
-    if (is.null(res.data$seqs[i]) == TRUE) {res.data$seqs[i]<-NA}
     if (is.na(res.data$seqs[i])==FALSE){ # NA try function from get_seqs_for_id returns in mistake; "\n" - is no seq (master record)
       if (res.data$seqs[i]=="no sequence" | res.data$seqs[i]=="\n"){
         if (verbose) message ("note ", i, " - ", res.data$ids[i], " no sequence")
